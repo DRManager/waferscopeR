@@ -23,14 +23,12 @@ fig.show = 'asis'
 
 ```
 
-This guide is to demonstrate the functions of **waferscopeR** and document the internal datasets for exploration.
+This guide is to demonstrate the functions of **waferscopeR** and document the internal data sets for exploration.
 
 - Functions to read from raw data files
 - Wafer level statistics
 - Plot and compare wafer maps
 - Explore wafer lot data
-- Outlier detection
-- Statistical process control (SPC) chart 
 
 ## Read Raw Data Files
 
@@ -42,7 +40,7 @@ native_oxide <- system.file("extdata", "native_oxide.csv", package="waferscopeR"
 lot1 <- read_kla_f5(native_oxide)
 ```
 
-Each wafer cab be accessed by index within the list or slot number such as "slot1". The dat structure contains layer thickness, good of fit (GOF) and (x,y) coordinates of measurement within a wafer.
+Each wafer cab be accessed by index within the list or slot number such as "slot1". The data structure contains layer thickness, good of fit (GOF) and (x,y) coordinates of measurement within a wafer.
 
 ```{r access, message =F, cache=F}
 #Wafer names in the list
@@ -100,7 +98,7 @@ map_wafer(wafer=wafer.slot1,resolution="normal",point="off",maps="all")
 
 ```
 
-- maps = "decompose" all the radial and residual maps: a good way to visualize symmetric vs assymetric components
+- maps = "decompose" all the radial and residual maps: a good way to visualize symmetric vs asymmetric components
 
 ```{r wafer.map2, message =F, cache=F}
 
