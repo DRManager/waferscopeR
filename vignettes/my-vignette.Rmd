@@ -1,0 +1,163 @@
+---
+title: "waferscopeR User Guide"
+author: "Richard Yang, Jun Ma"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RDscope User Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message=FALSE, error=FALSE}
+#devtools::load_all()
+
+knitr::opts_chunk$set(
+  root.dir = normalizePath('../'),
+  fig.width = 6, fig.height = 6
+)
+
+options(digits=3)
+
+fig.show = 'asis'
+
+```
+
+This guide is to demonstrate the functions of **waferscopeR** and document the internal datasets for exploration.
+
+- Functions to read from raw data files
+- Wafer level statistics
+- Plot and compare wafer maps
+- Explore wafer lot data
+- Outlier detection
+- Statistical process control (SPC) chart 
+
+## Read Raw Data Files
+
+The function **read_kla_f5** reads the raw data file output from KLA-Tencor Spectra Ellipsometry tool directly. The data is saved in a list, which can be  accessed by slot number. The dataset "lot1" contain one lot (25 wafers) native oxide measured on Silicon substrate.
+
+```{r raw, message =F, cache=T}
+library(waferscopeR)
+native_oxide <- system.file("extdata", "native_oxide.csv", package="waferscopeR")
+lot1 <- read_kla_f5(native_oxide)
+```
+
+Each wafer cab be accessed by index within the list or slot number such as "slot1". The dat structure contains layer thickness, good of fit (GOF) and (x,y) coordinates of measurement within a wafer.
+
+```{r access, message =F, cache=F}
+#Wafer names in the list
+names(lot1)
+
+#Retrieve by wafer index and return as dataframe
+head(lot1[[1]])
+
+#Retrieve by slot name and return as dataframe
+head(lot1[["slot1"]])
+```
+
+## Wafer Statistics
+
+wafer_stat function would take wafer coordinate and thickness data and return list of statistics.
+
+- Mean thickness (mean.stat), 3 sigma, range and their 3-sigma and range NU in percentage
+- Radial component of the map (radial.stat), 3 sigma and range
+- Residual component of the map (resi.stat), 3 sigma and range
+
+```{r wafer.stat, message =F, cache=F}
+#read slot1 from collection and change the col name of "1st Thickness" to "ThK"
+wafer.slot1 <-lot1[["slot1"]]
+colnames(wafer.slot1) <- c("ThK","GOF","X","Y")
+
+# Output the statis of wafer 
+wafer_stat(wafer = wafer.slot1)
+
+```
+
+## Wafer Map
+
+Contour maps are used to visualize the data distribution across the wafers. Options to control the map output:
+
+- point = "on" shows data on the map, point = "off" turn-off data in the map
+```{r wafer.map1, message =F, cache=F, fig.width=4, fig.height=4}
+wafer.slot1 <-lot1[["slot1"]]
+colnames(wafer.slot1) <- c("ThK","GOF","X","Y")
+
+#Visualize mean map with datapoints on
+map_wafer(wafer=wafer.slot1,resolution="normal",point="on",maps="mean", wlabel = "slot1")
+
+```
+
+- maps ="mean" shows the mean map only and include the radial points distribution
+
+```{r wafer.map, message =F, cache=F}
+
+wafer.slot1 <-lot1[["slot1"]]
+colnames(wafer.slot1) <- c("ThK","GOF","X","Y")
+
+
+#Visualize mean map, radial, residual and radial distribution maps
+map_wafer(wafer=wafer.slot1,resolution="normal",point="off",maps="all")
+
+```
+
+- maps = "decompose" all the radial and residual maps: a good way to visualize symmetric vs assymetric components
+
+```{r wafer.map2, message =F, cache=F}
+
+wafer.slot1 <-lot1[["slot1"]]
+colnames(wafer.slot1) <- c("ThK","GOF","X","Y")
+
+
+#decompose into different points
+map_decompose(wafer=wafer.slot1,resolution="normal",point="off",maps="decompose")
+
+```
+
+## Explore wafer lot
+
+A quick exploration of wafer maps can be done with KLA raw data files. explore_lot_klaraw(pre,post) takes in pre and post files and output the pre, post and delta thickness and a table with uniformity statistics.
+
+```{r lot.explore, message =F, cache=F}
+pre <- system.file("extdata", "pre.csv", package="waferscopeR")
+post <- system.file("extdata", "post.csv", package="waferscopeR")
+
+explore_lot_klaraw(pre,post)
+
+```
+
+Explore the data with a single file with explore_klaraw (file, output)
+```{r lot.explore_kla, message =F, cache=F}
+
+explore_klaraw(pre,output="summary")
+
+```
+
+
+## Compare wafers
+
+Wafer data can be compared side by side with compare_wafer. The input takes in two wafer data frames. Output options are :
+
+- output = "delta", output two wafer maps, delta map and the radial distribution
+```{r compare-waf, fig.cap=" Wafer Side-by-side Comparison"}
+#read wafer collection data from tabulated csv file
+wafer_collection <- system.file("extdata", "wafer_collection.csv", package="waferscopeR")
+wafer.collection1 <- read.csv(wafer_collection)
+#select slot1 from the collection and name z to "ThK"
+wafer1 <- wafer.collection1[, 1:3]
+wafer2<-wafer.collection1[, c(1,2,4)]
+waferscopeR::compare_wafer(wafer1,wafer2, output="delta")
+```
+
+
+- output = "compare", output two maps and side-by-side plot with boxplot and radial distribution
+
+```{r compare-waf2, fig.cap=" Wafer Side-by-side Comparison"}
+#read wafer collection data from tabulated csv file
+wafer.collection1 <- read.csv(wafer_collection)
+#select slot1 from the collection and name z to "ThK"
+wafer1 <- wafer.collection1[, 1:3]
+wafer2<-wafer.collection1[, c(1,2,4)]
+waferscopeR::compare_wafer(wafer1,wafer2, output="compare")
+```
+
+

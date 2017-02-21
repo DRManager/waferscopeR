@@ -1,0 +1,26 @@
+Package: waferscopeR
+Type: Package
+Title: Grammar for wafer level uniformity analysis
+Version: 0.1.0
+Author: Richard Yang, Jun Ma
+Maintainer: Richard Yang <rdyang@gmail.com>, Jun Ma <majun0118@gmail.com>
+Description: This package facilitates wafer profile analysis at scale. 
+License: MIT
+LazyData: TRUE
+Depends:
+    R (>= 3.3.2)
+Imports:
+    dplyr,
+    ggplot2,
+    tidyr,
+    grid,
+    gridExtra,
+    magrittr,
+      plotly,
+    methods
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
